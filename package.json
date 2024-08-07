@@ -13,7 +13,8 @@
   "scripts": {
     "build": "cd client && npm install && npm run build && cd ..",
     "deploy": "cp -a client/build/. public/",
-    "postinstall": "npm run build && npm run deploy && echo 'Client built!'"
+    "postinstall": "npm run build && npm run deploy && echo 'Client built!'",
+    "start": "craco start"
   },
   "repository": {
     "type": "git",
@@ -25,5 +26,8 @@
   "bugs": {
     "url": "https://github.com/NimaBoscarino/stigma/issues"
   },
-  "homepage": "https://github.com/NimaBoscarino/stigma#readme"
+  "homepage": "https://github.com/NimaBoscarino/stigma#readme",
+  "dependencies": {
+    "@craco/craco": "^7.1.0"
+  }
 }
