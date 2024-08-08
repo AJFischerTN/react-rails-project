@@ -2,13 +2,41 @@ import React, { Component } from "react";
 import axios from "axios";
 import "./App.css";
 
+class Modal extends Component {
+  render() {
+    const { isOpen, onClose, content } = this.props;
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-custom-bg text-white p-6 rounded-lg max-w-md w-full">
+          <div className="mb-4">{content}</div>
+          <button
+            onClick={onClose}
+            className="bg-white text-black px-4 py-2 rounded-md font-semibold"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       message: "Click the button to load data!",
+      selectedNavItem: "All",
+      isModalOpen: false,
+      modalContent: null,
     };
   }
+
+  handleNavItemClick = (item) => {
+    this.setState({ selectedNavItem: item });
+  };
 
   fetchData = () => {
     axios
@@ -24,10 +52,57 @@ class App extends Component {
       });
   };
 
+  handleJokeClick = () => {
+    axios
+      .post("/api/jokes")
+      .then((response) => {
+        this.setState({
+          isModalOpen: true,
+          modalContent: <p className="text-lg">{response.data.joke}</p>,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching joke:", error);
+      });
+  };
+
+  handleProductClick = (product) => {
+    this.setState({
+      isModalOpen: true,
+      modalContent: (
+        <div>
+          <h2 className="text-xl font-bold mb-2">{product.title}</h2>
+          <p className="mb-2">By {product.author}</p>
+          <p className="mb-2">Price: {product.price}</p>
+          <p>Rating: {product.rating}</p>
+        </div>
+      ),
+    });
+  };
+
+  handleCategoryClick = (category) => {
+    this.setState({
+      isModalOpen: true,
+      modalContent: (
+        <div>
+          <h2 className="text-xl font-bold mb-2">{category.title}</h2>
+          <p className="mb-2">{category.description}</p>
+          <p className="mb-1">{category.creators} creators</p>
+          <p className="mb-1">{category.products} products</p>
+          <p>{category.sales} sales</p>
+        </div>
+      ),
+    });
+  };
+
+  closeModal = () => {
+    this.setState({ isModalOpen: false, modalContent: null });
+  };
+
   render() {
     return (
-      <div className="bg-black text-white min-h-screen">
-        <header className="bg-black p-4 border-b border-gray-800">
+      <div className="bg-custom-bg text-white min-h-screen">
+        <header className="bg-custom-bg p-4 border-b border-gray-800">
           <div className="container mx-auto flex justify-between items-center">
             <h1 className="text-2xl font-bold">Gumroad</h1>
             <div className="flex items-center space-x-4">
@@ -35,7 +110,7 @@ class App extends Component {
                 <input
                   type="text"
                   placeholder="Search products"
-                  className="bg-gray-900 px-4 py-2 rounded-full w-64 pl-10"
+                  className="bg-black px-4 py-2 rounded-full w-64 pl-10"
                 />
                 <svg
                   className="w-5 h-5 absolute left-3 top-2.5 text-gray-400"
@@ -52,17 +127,17 @@ class App extends Component {
                   />
                 </svg>
               </div>
-              <button className="bg-gray-900 px-4 py-2 rounded-md">
-                Login
-              </button>
-              <button className="bg-white text-black px-4 py-2 rounded-md font-semibold">
-                Start selling
+              <button
+                className="bg-white text-black px-4 py-2 rounded-md font-semibold"
+                onClick={this.handleJokeClick}
+              >
+                Tell me a Joke
               </button>
             </div>
           </div>
         </header>
 
-        <nav className="bg-gray-900 p-4">
+        <nav className="bg-custom-bg p-4">
           <div className="container mx-auto flex space-x-6">
             {[
               "All",
@@ -76,9 +151,17 @@ class App extends Component {
               "Software Development",
               "More",
             ].map((item) => (
-              <a key={item} href="#" className="hover:text-gray-300 text-sm">
+              <button
+                key={item}
+                className={`hover:text-gray-300 text-sm px-3 py-1 rounded-full ${
+                  this.state.selectedNavItem === item
+                    ? "border border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                    : ""
+                }`}
+                onClick={() => this.handleNavItemClick(item)}
+              >
                 {item}
-              </a>
+              </button>
             ))}
           </div>
         </nav>
@@ -125,17 +208,18 @@ class App extends Component {
             ].map((product) => (
               <div
                 key={product.title}
-                className="bg-gray-800 rounded-lg overflow-hidden"
+                className="bg-black rounded-lg overflow-hidden transition duration-300 ease-in-out hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] flex flex-col h-full"
+                onClick={() => this.handleProductClick(product)}
               >
                 <img
                   src={product.image}
                   alt={product.title}
                   className="w-full h-40 object-cover"
                 />
-                <div className="p-4">
+                <div className="p-4 flex flex-col flex-grow">
                   <h3 className="font-bold text-sm">{product.title}</h3>
                   <p className="text-xs text-gray-400 mt-1">{product.author}</p>
-                  <div className="flex justify-between items-center mt-2">
+                  <div className="flex justify-between items-center mt-auto pt-2">
                     <span className="text-pink-500 font-bold text-sm">
                       {product.price}
                     </span>
@@ -172,7 +256,8 @@ class App extends Component {
             ].map((category) => (
               <div
                 key={category.title}
-                className="bg-gray-800 rounded-lg p-6 flex items-center space-x-4"
+                className="bg-black rounded-lg p-6 flex items-center space-x-4 transition duration-200 ease-in-out hover:shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                onClick={() => this.handleCategoryClick(category)}
               >
                 <div
                   className={`w-16 h-16 ${category.color} rounded-full flex-shrink-0 flex items-center justify-center`}
@@ -196,6 +281,12 @@ class App extends Component {
             ))}
           </div>
         </main>
+
+        <Modal
+          isOpen={this.state.isModalOpen}
+          onClose={this.closeModal}
+          content={this.state.modalContent}
+        />
       </div>
     );
   }
