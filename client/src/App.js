@@ -31,6 +31,7 @@ class App extends Component {
       selectedNavItem: "All",
       isModalOpen: false,
       modalContent: null,
+      isNavOpen: false,
     };
   }
 
@@ -99,7 +100,21 @@ class App extends Component {
     this.setState({ isModalOpen: false, modalContent: null });
   };
 
+  toggleNav = () => {
+    this.setState((prevState) => ({ isNavOpen: !prevState.isNavOpen }));
+  };
+
   render() {
+    const navItems = [
+      "All",
+      "Design",
+      "Drawing & Painting",
+      "3D",
+      "Self Improvement",
+      "Films",
+      "Software Development",
+      "More",
+    ];
     return (
       <div className="bg-custom-bg text-white min-h-screen">
         <header className="bg-custom-bg p-4 border-b border-gray-800">
@@ -138,31 +153,34 @@ class App extends Component {
         </header>
 
         <nav className="bg-custom-bg p-4">
-          <div className="container mx-auto flex space-x-6">
-            {[
-              "All",
-              "Design",
-              "Drawing & Painting",
-              "3D",
-              "Self Improvement",
-              "Films",
-              "Music & Sound Design",
-              "Business & Money",
-              "Software Development",
-              "More",
-            ].map((item) => (
+          <div className="container mx-auto">
+            <div className="md:hidden">
               <button
-                key={item}
-                className={`hover:text-gray-300 text-sm px-3 py-1 rounded-full ${
-                  this.state.selectedNavItem === item
-                    ? "border border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]"
-                    : ""
-                }`}
-                onClick={() => this.handleNavItemClick(item)}
+                onClick={this.toggleNav}
+                className="text-white focus:outline-none"
               >
-                {item}
+                {this.state.isNavOpen ? "Close" : "Menu"}
               </button>
-            ))}
+            </div>
+            <div
+              className={`md:flex ${this.state.isNavOpen ? "block" : "hidden"}`}
+            >
+              <div className="md:flex md:space-x-6 flex-wrap">
+                {navItems.map((item) => (
+                  <button
+                    key={item}
+                    className={`hover:text-gray-300 text-sm px-3 py-1 rounded-full mb-2 md:mb-0 ${
+                      this.state.selectedNavItem === item
+                        ? "border border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                        : ""
+                    }`}
+                    onClick={() => this.handleNavItemClick(item)}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </nav>
 
