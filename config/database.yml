@@ -15,3 +15,7 @@ development:
 test:
   <<: *connection
   database: rails_test
+
+production:
+  <<: *connection
+  database: rails_production
